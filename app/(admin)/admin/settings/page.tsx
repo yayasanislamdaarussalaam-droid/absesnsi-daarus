@@ -18,12 +18,14 @@ export default async function SettingsPage() {
     .eq('id', user.id)
     .single()
 
-  if (!profile || profile.role !== 'admin') redirect('/scan')
+  if (!profile || (profile as any).role !== 'admin') redirect('/scan')
+
+  const adminProfile = profile as any;
 
   const { data: office } = await supabase
     .from('offices')
     .select('*')
-    .eq('id', profile.office_id!)
+    .eq('id', adminProfile.office_id!)
     .single()
 
   return (
@@ -36,7 +38,7 @@ export default async function SettingsPage() {
         </CardHeader>
         <CardContent>
           <form action={updateOfficeSettings} className="space-y-4">
-            <input type="hidden" name="office_id" value={profile.office_id!} />
+            <input type="hidden" name="office_id" value={adminProfile.office_id!} />
             <div>
               <Label htmlFor="name">Nama Kantor</Label>
               <Input id="name" name="name" defaultValue={office?.name} required />

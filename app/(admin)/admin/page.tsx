@@ -17,22 +17,23 @@ export default async function AdminDashboard() {
     .eq('id', user.id)
     .single()
 
-  if (!profile || profile.role !== 'admin') {
+  if (!profile || (profile as any).role !== 'admin') {
     redirect('/scan')
   }
 
+  const adminProfile = profile as any;
   const today = formatJakartaDate(getJakartaNow())
 
   const { data: todayAttendance } = await supabase
     .from('attendance')
     .select('*')
-    .eq('office_id', profile.office_id)
+    .eq('office_id', adminProfile.office_id)
     .eq('date', today)
 
   const { count: totalEmployees } = await supabase
     .from('profiles')
     .select('*', { count: 'exact', head: true })
-    .eq('office_id', profile.office_id)
+    .eq('office_id', adminProfile.office_id)
     .eq('is_active', true)
 
   const present = todayAttendance?.filter(a => a.clock_in_at).length || 0
@@ -88,7 +89,7 @@ export default async function AdminDashboard() {
         </CardHeader>
         <CardContent>
           <AttendanceTable
-            officeId={profile.office_id!}
+            officeId={adminProfile.office_id!}
             fromDate={today}
             toDate={today}
           />

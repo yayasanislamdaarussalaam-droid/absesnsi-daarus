@@ -17,7 +17,9 @@ export default async function ExportPage() {
     .eq('id', user.id)
     .single()
 
-  if (!profile || profile.role !== 'admin') redirect('/scan')
+  if (!profile || (profile as any).role !== 'admin') redirect('/scan')
+
+  const adminProfile = profile as any;
 
   return (
     <div className="min-h-screen p-4 max-w-4xl mx-auto">
@@ -29,7 +31,7 @@ export default async function ExportPage() {
         </CardHeader>
         <CardContent>
           <form action="/api/admin/export" method="get" className="space-y-4">
-            <input type="hidden" name="office" value={profile.office_id!} />
+            <input type="hidden" name="office" value={adminProfile.office_id!} />
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm">Dari Tanggal</label>

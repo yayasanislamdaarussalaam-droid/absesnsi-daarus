@@ -19,7 +19,9 @@ export default async function NewEmployeePage() {
     .eq('id', user.id)
     .single()
 
-  if (!profile || profile.role !== 'admin') redirect('/scan')
+  if (!profile || (profile as any).role !== 'admin') redirect('/scan')
+
+  const adminProfile = profile as any;
 
   return (
     <div className="min-h-screen p-4 max-w-2xl mx-auto">
@@ -31,7 +33,7 @@ export default async function NewEmployeePage() {
         </CardHeader>
         <CardContent>
           <form action={createEmployee} className="space-y-4">
-            <input type="hidden" name="office_id" value={profile.office_id!} />
+            <input type="hidden" name="office_id" value={adminProfile.office_id!} />
             <div>
               <Label htmlFor="full_name">Nama Lengkap</Label>
               <Input id="full_name" name="full_name" required />

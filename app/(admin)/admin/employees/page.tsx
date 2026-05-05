@@ -18,12 +18,14 @@ export default async function EmployeesPage() {
     .eq('id', user.id)
     .single()
 
-  if (!profile || profile.role !== 'admin') redirect('/scan')
+  if (!profile || (profile as any).role !== 'admin') redirect('/scan')
+
+  const adminProfile = profile as any;
 
   const { data: employees } = await supabase
     .from('profiles')
     .select('*')
-    .eq('office_id', profile.office_id)
+    .eq('office_id', adminProfile.office_id)
     .order('created_at', { ascending: false })
 
   return (

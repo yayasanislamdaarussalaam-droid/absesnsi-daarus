@@ -22,7 +22,9 @@ export default async function AttendanceLogPage({
     .eq('id', user.id)
     .single()
 
-  if (!profile || profile.role !== 'admin') redirect('/scan')
+  if (!profile || (profile as any).role !== 'admin') redirect('/scan')
+
+  const adminProfile = profile as any;
 
   return (
     <div className="min-h-screen p-4 max-w-6xl mx-auto">
@@ -50,7 +52,7 @@ export default async function AttendanceLogPage({
       </Card>
 
       <AttendanceTable
-        officeId={profile.office_id!}
+        officeId={adminProfile.office_id!}
         fromDate={searchParams.from}
         toDate={searchParams.to}
       />
