@@ -24,13 +24,15 @@ export default async function EditEmployeePage({ params }: EditEmployeePageProps
     .eq('id', user.id)
     .single()
 
-  if (!profile || profile.role !== 'admin') redirect('/scan')
+  if (!profile || (profile as any).role !== 'admin') redirect('/scan')
 
-  const { data: employee } = await supabase
+  const { data: employeeData } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', params.id)
     .single()
+
+  const employee = employeeData as any;
 
   if (!employee) redirect('/admin/employees')
 
