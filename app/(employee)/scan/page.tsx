@@ -38,11 +38,13 @@ export default async function ScanPage({
     )
   }
 
-  const { data: profile } = await supabase
+  const { data: profileData } = await supabase
     .from('profiles')
     .select('full_name, office_id')
     .eq('id', user.id)
     .single()
+
+  const profile = profileData as any;
 
   const { data: office } = await supabase
     .from('offices')
@@ -65,8 +67,10 @@ export default async function ScanPage({
     )
   }
 
-  const attendance = await getTodayAttendance(searchParams.office)
-  const recentAttendance = await getRecentAttendance(7)
+  const attendanceData = await getTodayAttendance(searchParams.office)
+  const attendance = attendanceData as any;
+  const recentAttendanceData = await getRecentAttendance(7)
+  const recentAttendance = (recentAttendanceData || []) as any[]
   const now = getJakartaNow()
 
   return (
