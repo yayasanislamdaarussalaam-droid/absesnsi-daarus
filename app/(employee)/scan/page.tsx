@@ -46,11 +46,13 @@ export default async function ScanPage({
 
   const profile = profileData as any;
 
-  const { data: office } = await supabase
+  const { data: officeData } = await supabase
     .from('offices')
     .select('*')
     .eq('qr_code_token', searchParams.office)
     .single()
+
+  const office = officeData as any;
 
   if (!office) {
     return (
