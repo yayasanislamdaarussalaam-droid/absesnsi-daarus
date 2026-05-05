@@ -1,18 +1,19 @@
-import { createClient } from "@/lib/supabase/server"
-import { redirect } from "next/navigation"
+import { createClient, createServiceClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { updateOfficeSettings } from "@/lib/actions/admin"
+import { redirect } from "next/navigation"
 
 export default async function SettingsPage() {
   const supabase = createClient()
+  const serviceClient = createServiceClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
+  const { data: profile } = await serviceClient
     .from('profiles')
     .select('role, office_id')
     .eq('id', user.id)
@@ -22,11 +23,17 @@ export default async function SettingsPage() {
 
   const adminProfile = profile as any;
 
-  const { data: office } = await supabase
+  const { data: office } = await serviceClient
     .from('offices')
     .select('*')
     .eq('id', adminProfile.office_id!)
     .single()
+
+  // Wrapper for server action to satisfy TS type
+  async function handleSubmit(formData: FormData) {
+    'use server'
+    await updateOfficeSettings(formData)
+  }
 
   return (
     <div className="min-h-screen p-4 max-w-4xl mx-auto">
@@ -37,7 +44,7 @@ export default async function SettingsPage() {
           <CardTitle>Informasi Kantor</CardTitle>
         </CardHeader>
         <CardContent>
-          <form action={updateOfficeSettings} className="space-y-4">
+          <form action={handleSubmit} className="space-y-4">
             <input type="hidden" name="office_id" value={adminProfile.office_id!} />
             <div>
               <Label htmlFor="name">Nama Kantor</Label>
