@@ -30,15 +30,17 @@ export default async function AdminDashboard() {
     .eq('office_id', adminProfile.office_id)
     .eq('date', today)
 
+  const records = (todayAttendance || []) as any[]
+
   const { count: totalEmployees } = await supabase
     .from('profiles')
     .select('*', { count: 'exact', head: true })
     .eq('office_id', adminProfile.office_id)
     .eq('is_active', true)
 
-  const present = todayAttendance?.filter(a => a.clock_in_at).length || 0
-  const late = todayAttendance?.filter(a => a.status === 'late').length || 0
-  const stillWorking = todayAttendance?.filter(a => a.clock_in_at && !a.clock_out_at).length || 0
+  const present = records.filter(a => a.clock_in_at).length
+  const late = records.filter(a => a.status === 'late').length
+  const stillWorking = records.filter(a => a.clock_in_at && !a.clock_out_at).length
 
   return (
     <div className="min-h-screen p-4 max-w-6xl mx-auto">
