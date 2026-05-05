@@ -7,7 +7,7 @@ import { CountdownTimer } from "@/components/attendance/CountdownTimer"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { logout } from "@/lib/actions/auth"
-import { getJakartaNow, formatJakarta, getJakartaTime, canClockOut } from "@/lib/utils/date"
+import { getJakartaNow, formatJakarta, formatJakartaTime, canClockOut } from "@/lib/utils/date"
 import { Clock, LogOut, History } from "lucide-react"
 import Link from "next/link"
 
