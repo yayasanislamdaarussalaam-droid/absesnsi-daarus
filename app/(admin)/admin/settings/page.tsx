@@ -23,11 +23,13 @@ export default async function SettingsPage() {
 
   const adminProfile = profile as any;
 
-  const { data: office } = await serviceClient
+  const { data: officeData } = await serviceClient
     .from('offices')
     .select('*')
     .eq('id', adminProfile.office_id!)
     .single()
+
+  const office = officeData as any;
 
   // Wrapper for server action to satisfy TS type
   async function handleSubmit(formData: FormData) {
