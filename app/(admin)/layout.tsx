@@ -23,7 +23,7 @@ export default async function AdminLayout({
     .eq('id', user.id)
     .single()
 
-  if (!profile || profile.role !== 'admin') {
+  if (!profile || (profile as any).role !== 'admin') {
     redirect('/scan')
   }
 
