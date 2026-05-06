@@ -38,11 +38,9 @@ export default function RegisterPage({
     )
   }
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+  async function handleSubmit(formData: FormData) {
     setIsLoading(true)
     
-    const formData = new FormData(event.currentTarget)
     // Make sure office_token is included
     if (!formData.get('office_token')) {
       formData.set('office_token', searchParams.office || '')
