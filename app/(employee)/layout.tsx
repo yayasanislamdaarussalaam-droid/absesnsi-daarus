@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
+import { headers } from "next/headers"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { LogOut, QrCode, History } from "lucide-react"
@@ -13,7 +14,12 @@ export default async function EmployeeLayout({
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) redirect('/login')
+  if (!user) {
+    const headersList = await headers()
+    const url = new URL(headersList.get('x-url') || headersList.get('referer') || 'http://localhost')
+    const office = url.searchParams.get('office')
+    redirect(`/register${office ? `?office=${office}` : ''}`)
+  }
 
   return (
     <div>
