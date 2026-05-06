@@ -15,8 +15,9 @@ export async function updateOfficeSettings(formData: FormData) {
     .select('role')
     .eq('id', user.id)
     .single()
+  const adminProfile = profile as { role?: string } | null
 
-  if (!profile || profile.role !== 'admin') redirect('/scan')
+  if (!adminProfile || adminProfile.role !== 'admin') redirect('/scan')
 
   const officeId = formData.get('office_id') as string
   const name = formData.get('name') as string
@@ -24,8 +25,8 @@ export async function updateOfficeSettings(formData: FormData) {
   const standardClockOut = formData.get('standard_clock_out') as string
   const workDurationMinutes = parseInt(formData.get('work_duration_minutes') as string)
 
-  await supabase
-    .from('offices')
+  await (supabase
+    .from('offices') as any)
     .update({
       name,
       standard_clock_in: standardClockIn,
@@ -49,14 +50,15 @@ export async function regenerateQR() {
     .select('role, office_id')
     .eq('id', user.id)
     .single()
+  const adminOfficeProfile = profile as { role?: string; office_id?: string | null } | null
 
-  if (!profile || profile.role !== 'admin') redirect('/scan')
+  if (!adminOfficeProfile || adminOfficeProfile.role !== 'admin') redirect('/scan')
 
   const newToken = crypto.randomUUID().replace(/-/g, '') + Date.now().toString(36)
-  await supabase
-    .from('offices')
+  await (supabase
+    .from('offices') as any)
     .update({ qr_code_token: newToken })
-    .eq('id', profile.office_id!)
+    .eq('id', adminOfficeProfile.office_id!)
 
   revalidatePath('/admin/qr')
   return { token: newToken }
@@ -73,14 +75,16 @@ export async function getOfficeToken() {
     .select('office_id')
     .eq('id', user.id)
     .single()
+  const officeProfile = profile as { office_id?: string | null } | null
 
-  if (!profile) return null
+  if (!officeProfile) return null
 
   const { data: office } = await supabase
     .from('offices')
     .select('qr_code_token')
-    .eq('id', profile.office_id!)
+    .eq('id', officeProfile.office_id!)
     .single()
+  const officeTokenRecord = office as { qr_code_token?: string | null } | null
 
-  return office?.qr_code_token || null
+  return officeTokenRecord?.qr_code_token || null
 }

@@ -20,21 +20,22 @@ export async function clockIn(officeToken: string, fingerprint: string, userAgen
     .select('*')
     .eq('qr_code_token', officeToken)
     .single()
+  const officeRecord = office as any
 
-  if (!office) {
+  if (!officeRecord) {
     return { error: 'Token kantor tidak valid' }
   }
 
   const now = getJakartaNow()
   const today = formatJakartaDate(now)
-  const minutesLate = getMinutesLate(now, office.standard_clock_in)
+  const minutesLate = getMinutesLate(now, officeRecord.standard_clock_in)
   const status = minutesLate > 0 ? 'late' : 'on_time'
 
   const { data: existing } = await supabase
     .from('attendance')
     .select('id')
     .eq('user_id', userId)
-    .eq('office_id', office.id)
+    .eq('office_id', officeRecord.id)
     .eq('date', today)
     .single()
 
@@ -43,16 +44,17 @@ export async function clockIn(officeToken: string, fingerprint: string, userAgen
   }
 
   // Get or create device
-  let { data: device } = await supabase
+  const { data: deviceData } = await supabase
     .from('devices')
     .select('id')
     .eq('user_id', userId)
     .eq('fingerprint', fingerprint)
     .single()
+  let device: { id?: string } | null = deviceData as { id?: string } | null
 
   if (!device) {
-    const { data: newDevice } = await supabase
-      .from('devices')
+    const { data: newDevice } = await (supabase
+      .from('devices') as any)
       .insert({
         user_id: userId,
         fingerprint: fingerprint,
@@ -62,15 +64,15 @@ export async function clockIn(officeToken: string, fingerprint: string, userAgen
       .single()
     device = newDevice
   } else {
-    await supabase
-      .from('devices')
+    await (supabase
+      .from('devices') as any)
       .update({ last_seen_at: now.toISOString() })
       .eq('id', device.id)
   }
 
-  const { error } = await supabase.from('attendance').insert({
+  const { error } = await (supabase.from('attendance') as any).insert({
     user_id: userId,
-    office_id: office.id,
+    office_id: officeRecord.id,
     date: today,
     clock_in_at: now.toISOString(),
     minutes_late: minutesLate,
@@ -101,8 +103,9 @@ export async function clockOut(officeToken: string) {
     .select('*')
     .eq('qr_code_token', officeToken)
     .single()
+  const officeRecord = office as any
 
-  if (!office) {
+  if (!officeRecord) {
     return { error: 'Token kantor tidak valid' }
   }
 
@@ -113,32 +116,33 @@ export async function clockOut(officeToken: string) {
     .from('attendance')
     .select('*')
     .eq('user_id', userId)
-    .eq('office_id', office.id)
+    .eq('office_id', officeRecord.id)
     .eq('date', today)
     .single()
+  const attendanceRecord = attendance as any
 
-  if (!attendance) {
+  if (!attendanceRecord) {
     return { error: 'Anda belum melakukan clock in hari ini' }
   }
 
-  if (attendance.clock_out_at) {
+  if (attendanceRecord.clock_out_at) {
     return { error: 'Anda sudah melakukan clock out hari ini' }
   }
 
-  if (!canClockOut(attendance.clock_in_at, office.work_duration_minutes)) {
-    const remaining = getClockOutAvailableIn(attendance.clock_in_at, office.work_duration_minutes)
+  if (!canClockOut(attendanceRecord.clock_in_at, officeRecord.work_duration_minutes)) {
+    const remaining = getClockOutAvailableIn(attendanceRecord.clock_in_at, officeRecord.work_duration_minutes)
     return {
-      error: `Belum waktunya pulang. Anda bisa clock out pada jam ${formatJakartaTime(attendance.clock_in_at, office.work_duration_minutes)}`
+      error: `Belum waktunya pulang. Anda bisa clock out pada jam ${formatJakartaTime(attendanceRecord.clock_in_at, officeRecord.work_duration_minutes)}`
     }
   }
 
-  const { error } = await supabase
-    .from('attendance')
+  const { error } = await (supabase
+    .from('attendance') as any)
     .update({
       clock_out_at: now.toISOString(),
-      status: attendance.status === 'late' ? 'late' : 'on_time',
+      status: attendanceRecord.status === 'late' ? 'late' : 'on_time',
     })
-    .eq('id', attendance.id)
+    .eq('id', attendanceRecord.id)
 
   if (error) {
     return { error: error.message }
@@ -167,8 +171,9 @@ export async function getTodayAttendance(officeToken: string) {
     .select('*')
     .eq('qr_code_token', officeToken)
     .single()
+  const officeRecord = office as any
 
-  if (!office) return null
+  if (!officeRecord) return null
 
   const today = formatJakartaDate(getJakartaNow())
 
@@ -176,7 +181,7 @@ export async function getTodayAttendance(officeToken: string) {
     .from('attendance')
     .select('*')
     .eq('user_id', user.data.user.id)
-    .eq('office_id', office.id)
+    .eq('office_id', officeRecord.id)
     .eq('date', today)
     .single()
 

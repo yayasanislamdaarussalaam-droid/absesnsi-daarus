@@ -28,8 +28,8 @@ export async function createEmployee(formData: FormData) {
   }
 
   if (data.user) {
-    await supabase
-      .from('profiles')
+    await (supabase
+      .from('profiles') as any)
       .update({
         full_name: fullName,
         phone,
@@ -51,8 +51,8 @@ export async function updateEmployee(employeeId: string, formData: FormData) {
   const role = formData.get('role') as 'employee' | 'admin'
   const isActive = formData.get('is_active') === 'true'
 
-  await supabase
-    .from('profiles')
+  await (supabase
+    .from('profiles') as any)
     .update({
       full_name: fullName,
       phone,

@@ -13,8 +13,10 @@ interface AttendanceTableProps {
   employeeId?: string
 }
 
+type AttendanceRecord = any
+
 export function RealtimeAttendanceTable({ officeId, initialData, fromDate, toDate, employeeId }: AttendanceTableProps) {
-  const [attendance, setAttendance] = useState(initialData)
+  const [attendance, setAttendance] = useState<AttendanceRecord[]>(initialData)
   const supabase = createClient()
 
   useEffect(() => {
@@ -33,7 +35,7 @@ export function RealtimeAttendanceTable({ officeId, initialData, fromDate, toDat
           // it's easier to just re-fetch the latest data for the current view
           // or we can just prepend the new record if we fetch its profile
           if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
-             const { data: newRecord } = await supabase
+             const { data: newRecordData } = await supabase
               .from('attendance')
               .select(`
                 *,
@@ -41,9 +43,10 @@ export function RealtimeAttendanceTable({ officeId, initialData, fromDate, toDat
               `)
               .eq('id', payload.new.id)
               .single()
+            const newRecord = newRecordData as AttendanceRecord | null
 
             if (newRecord) {
-              setAttendance(prev => {
+              setAttendance((prev: AttendanceRecord[]) => {
                 const index = prev.findIndex(r => r.id === newRecord.id)
                 if (index >= 0) {
                   const updated = [...prev]

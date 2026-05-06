@@ -35,8 +35,9 @@ export async function register(formData: FormData) {
     .select('id')
     .eq('qr_code_token', officeToken)
     .single()
+  const officeRecord = office as { id?: string } | null
 
-  if (!office) {
+  if (!officeRecord) {
     return { error: 'Token kantor tidak valid' }
   }
 
@@ -58,11 +59,11 @@ export async function register(formData: FormData) {
   if (data.user) {
     // Check if user is already confirmed (if email confirmation is off)
     // or if we should proceed with profile update
-    const { error: profileError } = await supabase
-      .from('profiles')
+    const { error: profileError } = await (supabase
+      .from('profiles') as any)
       .update({
         full_name: fullName,
-        office_id: office.id,
+        office_id: officeRecord.id,
         role: 'employee',
       })
       .eq('id', data.user.id)
