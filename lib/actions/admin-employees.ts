@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createServiceClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { sendWhatsApp, formatClockInReminder } from '@/lib/utils/whatsapp'
 
 export async function createEmployee(formData: FormData) {
   const supabase = createServiceClient()
@@ -37,6 +38,17 @@ export async function createEmployee(formData: FormData) {
         role,
       })
       .eq('id', data.user.id)
+
+    // Send WhatsApp notification to employee
+    if (phone) {
+      const loginUrl = process.env.NEXT_PUBLIC_APP_URL || ''
+      const message = `🎉 Selamat! Akun Absensi Daarus Anda telah dibuat!\n\nNama: ${fullName}\nEmail: ${email}\nPassword: ${password}\n\nSilakan login di:\n${loginUrl}\n\nJangan lupa scan QR Code di kantor untuk absensi ya! 😊`
+      
+      const result = await sendWhatsApp(phone, message)
+      if (!result.success) {
+        console.error('Failed to send WhatsApp:', result.error)
+      }
+    }
   }
 
   revalidatePath('/admin/employees')
