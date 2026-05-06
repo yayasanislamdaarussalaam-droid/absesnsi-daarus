@@ -38,16 +38,21 @@ export default function RegisterPage({
     )
   }
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
     setIsLoading(true)
+    
+    const formData = new FormData(event.currentTarget)
+    // Make sure office_token is included
+    if (!formData.get('office_token')) {
+      formData.set('office_token', searchParams.office || '')
+    }
+    
     const result = await register(formData)
     if (result?.error) {
       toast.error(result.error)
       setIsLoading(false)
     }
-    // If no error, the server action will perform a redirect, 
-    // which Next.js handles automatically by throwing a special error 
-    // that we shouldn't catch here manually if we want the redirect to work.
   }
 
   return (
