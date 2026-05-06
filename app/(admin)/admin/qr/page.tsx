@@ -19,7 +19,7 @@ export default function QRPage({
 
   useEffect(() => {
     if (token) {
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
+      const appUrl = (process.env.NEXT_PUBLIC_APP_URL || window.location.origin).replace(/\/$/, '')
       const fullUrl = `${appUrl}/scan?office=${token}`
       setUrl(fullUrl)
       QRCode.toCanvas(canvasRef.current, fullUrl, { width: 400 }, (error) => {

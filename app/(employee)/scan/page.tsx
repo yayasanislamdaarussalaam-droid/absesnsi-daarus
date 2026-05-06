@@ -20,7 +20,7 @@ export default async function ScanPage({
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect(`/login${searchParams.office ? `?office=${searchParams.office}` : ''}`)
+    redirect(`/register${searchParams.office ? `?office=${searchParams.office}` : ''}`)
   }
 
   if (!searchParams.office) {
